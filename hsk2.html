@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 2 — Словарь</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="nav-back"><a href="index.html">← Главная</a></div>
+    <h1>Словарь HSK 2</h1>
+
+    <div id="progress-container">
+        <div id="progress-text">Выучено: 0 / …</div>
+        <div id="progress-bar"><div id="progress-bar-fill"></div></div>
+    </div>
+
+    <div class="tabs">
+        <button id="tab-flashcards" class="tab-btn active">Карточки</button>
+        <button id="tab-quiz-trans" class="tab-btn">Тест: Перевод</button>
+        <button id="tab-quiz-char"  class="tab-btn">Тест: Иероглиф</button>
+        <button id="tab-quiz-audio" class="tab-btn">Тест: Аудирование</button>
+        <button id="tab-review"     class="tab-btn">Повторение</button>
+    </div>
+
+    <!-- ===== FLASHCARDS ===== -->
+    <div id="flashcards" class="content">
+        <div id="card">
+            <div id="card-front">
+                <div id="chinese"></div>
+                <div id="pinyin"></div>
+                <button id="tts-btn" class="tts-button" title="Произнести">🔊</button>
+            </div>
+            <div id="card-back" style="display:none;">
+                <div id="russian"></div>
+            </div>
+        </div>
+        <button id="flip-card">Показать перевод</button>
+        <div id="srs-buttons" style="display:none;">
+            <button id="btn-unknown" class="btn-unknown">✗ Не знаю</button>
+            <button id="btn-known"   class="btn-known">✓ Знаю</button>
+        </div>
+    </div>
+
+    <!-- ===== QUIZ: TRANSLATION (Russian → Chinese+Pinyin) ===== -->
+    <div id="quiz-trans" class="content" style="display:none;">
+        <div class="quiz-prompt">Выберите иероглиф для слова:</div>
+        <div id="qt-question" class="quiz-question"></div>
+        <div id="qt-options"  class="quiz-options"></div>
+        <div id="qt-feedback" class="quiz-feedback"></div>
+        <button id="qt-next">Следующий вопрос</button>
+    </div>
+
+    <!-- ===== QUIZ: CHARACTER (Chinese → Pinyin+Russian) ===== -->
+    <div id="quiz-char" class="content" style="display:none;">
+        <div class="quiz-prompt">Выберите значение и пиньинь для иероглифа:</div>
+        <div id="qc-question" class="quiz-question" style="font-size:56px;"></div>
+        <div id="qc-options"  class="quiz-options"></div>
+        <div id="qc-feedback" class="quiz-feedback"></div>
+        <button id="qc-next">Следующий вопрос</button>
+    </div>
+
+    <!-- ===== QUIZ: AUDIO (Listen → Chinese+Pinyin+Russian) ===== -->
+    <div id="quiz-audio" class="content" style="display:none;">
+        <div class="quiz-prompt">Прослушайте слово и выберите правильный вариант:</div>
+        <button id="qa-play" class="play-button">🔊 Воспроизвести</button>
+        <div id="qa-options"  class="quiz-options"></div>
+        <div id="qa-feedback" class="quiz-feedback"></div>
+        <button id="qa-next">Следующий вопрос</button>
+    </div>
+
+    <!-- ===== REVIEW (mixed) ===== -->
+    <div id="review" class="content" style="display:none;">
+        <div id="review-container"></div>
+        <div id="review-feedback" class="quiz-feedback"></div>
+        <button id="review-next">Следующее</button>
+        <div id="review-empty" style="display:none;">
+            <p class="empty-msg">Нет слов для повторения.<br>Учите новые слова в разделе «Карточки»!</p>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Говорение</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="nav-back"><a href="index.html">← Главная</a></div>
+    <h1>Практика говорения</h1>
+
+    <div class="tabs">
+        <button id="tab-tones"    class="tab-btn active">Тоны</button>
+        <button id="tab-speaking" class="tab-btn">Говорение</button>
+    </div>
+
+    <!-- ===== ТОНЫ: tone marking exercise ===== -->
+    <div id="tones" class="content">
+        <p class="section-hint">Прослушайте слово и проставьте тоны для каждого слога.</p>
+
+        <div id="tone-card">
+            <div id="tone-chinese"></div>
+            <div id="tone-pinyin-stripped"></div>
+        </div>
+        <button id="tone-play" class="play-button">🔊 Прослушать слово</button>
+
+        <div id="tone-syllables"></div>
+
+        <div id="tone-feedback" class="quiz-feedback" style="margin-top:12px"></div>
+        <div id="tone-buttons" style="margin-top:10px;display:none">
+            <button id="tone-check">Проверить</button>
+            <button id="tone-next">Следующее слово</button>
+        </div>
+        <button id="tone-new" style="display:none">Следующее слово</button>
+    </div>
+
+    <!-- ===== ГОВОРЕНИЕ: speech recognition ===== -->
+    <div id="speaking" class="content" style="display:none;">
+        <p class="section-hint">Прочитайте слово вслух. Нажмите микрофон и произнесите его по-китайски.</p>
+
+        <div id="speak-card">
+            <div id="speak-chinese"></div>
+            <div id="speak-pinyin"></div>
+            <div id="speak-russian" style="font-size:16px;color:#888;margin-top:4px"></div>
+        </div>
+
+        <div id="speak-controls">
+            <button id="speak-tts" class="play-button">🔊 Образец произношения</button>
+            <button id="speak-mic" class="mic-button" title="Нажмите и говорите">🎤</button>
+        </div>
+
+        <div id="speak-status" style="color:#888;font-size:14px;margin:8px 0"></div>
+        <div id="speak-result"></div>
+        <div id="speak-feedback" class="quiz-feedback"></div>
+
+        <button id="speak-next">Следующее слово</button>
+        <div id="speak-no-support" style="display:none;color:#c62828;margin-top:12px">
+            ⚠️ Ваш браузер не поддерживает распознавание речи. Попробуйте Chrome или Edge.
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="speaking.js"></script>
+</body>
+</html>

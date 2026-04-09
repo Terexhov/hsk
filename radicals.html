@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>214 Радикалов</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="nav-back"><a href="index.html">← Главная</a></div>
+    <h1>214 Радикалов Канси</h1>
+
+    <div id="progress-container">
+        <div id="progress-text">Выучено: 0 / 214</div>
+        <div id="progress-bar"><div id="progress-bar-fill"></div></div>
+    </div>
+
+    <div class="tabs">
+        <button id="tab-flashcards" class="tab-btn active">Карточки</button>
+        <button id="tab-quiz"       class="tab-btn">Тест</button>
+        <button id="tab-review"     class="tab-btn">Повторение</button>
+    </div>
+
+    <!-- ===== FLASHCARDS ===== -->
+    <div id="flashcards" class="content">
+        <div id="card">
+            <div id="card-front">
+                <div id="rad-char"></div>
+                <div id="rad-strokes" class="strokes-badge"></div>
+                <button id="tts-btn" class="tts-button" title="Произнести">🔊</button>
+            </div>
+            <div id="card-back" style="display:none;">
+                <div id="rad-pinyin" style="font-size:22px;color:#666;margin-bottom:6px;"></div>
+                <div id="rad-russian" style="font-size:22px;"></div>
+            </div>
+        </div>
+        <button id="flip-card">Показать значение</button>
+        <div id="srs-buttons" style="display:none;">
+            <button id="btn-unknown" class="btn-unknown">✗ Не знаю</button>
+            <button id="btn-known"   class="btn-known">✓ Знаю</button>
+        </div>
+    </div>
+
+    <!-- ===== QUIZ (Russian meaning → Radical) ===== -->
+    <div id="quiz" class="content" style="display:none;">
+        <div class="quiz-prompt">Выберите радикал для значения:</div>
+        <div id="q-question" class="quiz-question"></div>
+        <div id="q-options"  class="quiz-options rad-grid"></div>
+        <div id="q-feedback" class="quiz-feedback"></div>
+        <button id="q-next">Следующий</button>
+    </div>
+
+    <!-- ===== REVIEW ===== -->
+    <div id="review" class="content" style="display:none;">
+        <div id="review-container"></div>
+        <div id="review-feedback" class="quiz-feedback"></div>
+        <button id="review-next">Следующее</button>
+        <div id="review-empty" style="display:none;">
+            <p class="empty-msg">Нет радикалов для повторения.<br>Продолжайте изучать в разделе «Карточки»!</p>
+        </div>
+    </div>
+
+    <script src="radicals-data.js"></script>
+    <script src="radicals.js"></script>
+</body>
+</html>

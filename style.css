@@ -1,0 +1,183 @@
+* { box-sizing: border-box; }
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 16px 20px 40px;
+}
+
+h1 { color: #333; margin: 8px 0 16px; }
+
+/* ===== BACK NAV ===== */
+.nav-back { text-align: left; margin-bottom: 4px; }
+.nav-back a { color: #666; text-decoration: none; font-size: 14px; }
+.nav-back a:hover { color: #333; }
+
+/* ===== PROGRESS ===== */
+#progress-container { max-width: 620px; margin: 0 auto 18px; }
+#progress-text { font-size: 14px; color: #555; margin-bottom: 5px; }
+#progress-bar { background:#ddd; border-radius:8px; height:11px; overflow:hidden; }
+#progress-bar-fill {
+    height:100%; width:0%;
+    background: linear-gradient(90deg,#4CAF50,#81c784);
+    border-radius:8px; transition: width 0.4s;
+}
+
+/* ===== TABS ===== */
+.tabs { margin-bottom: 18px; display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+.tab-btn {
+    padding: 9px 16px;
+    background-color: #bbb; color: white;
+    border: none; cursor: pointer; border-radius: 6px;
+    font-size: 14px; transition: background 0.2s;
+}
+.tab-btn:hover  { background-color: #999; }
+.tab-btn.active { background-color: #4CAF50; }
+
+/* ===== CONTENT ===== */
+.content {
+    max-width: 620px; margin: 0 auto;
+    background: white; padding: 22px 18px;
+    border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.11);
+}
+.section-hint { color:#888; font-size:14px; margin-top:0; }
+
+/* ===== CARD ===== */
+#card, #review-card, #tone-card, #speak-card, #rv-card {
+    min-height: 170px; display:flex; flex-direction:column;
+    justify-content:center; align-items:center;
+    border: 2px solid #ddd; border-radius:12px;
+    margin-bottom:16px; padding:18px; position:relative;
+}
+#card-front, #card-back, #rv-front, #rv-back {
+    display:flex; flex-direction:column; align-items:center; width:100%;
+}
+#chinese, #rad-char, #tone-chinese, #speak-chinese, #review-chinese {
+    font-size: 60px; line-height:1.2; margin-bottom:6px;
+}
+#tone-card #tone-chinese { font-size: 52px; }
+#speak-card #speak-chinese { font-size: 56px; }
+#pinyin, #rad-pinyin, #speak-pinyin, #review-pinyin { font-size:20px; color:#666; }
+#russian, #rad-russian, #review-russian { font-size:22px; color:#333; }
+
+.strokes-badge {
+    font-size:12px; color:#888; background:#f0f0f0;
+    border-radius:10px; padding:2px 8px; margin-top:4px;
+}
+
+.empty-msg { color:#999; font-size:16px; line-height:1.7; padding:10px 0; }
+
+/* ===== TTS / PLAY / MIC buttons ===== */
+button {
+    padding: 9px 20px; background:#2196F3; color:white;
+    border:none; border-radius:6px; cursor:pointer; margin:4px;
+    font-size:14px; transition:background 0.18s;
+}
+button:hover { background:#1976D2; }
+
+.tts-button {
+    background:none; border:1px solid #ccc; border-radius:50%;
+    width:34px; height:34px; font-size:15px; cursor:pointer;
+    margin-top:8px; padding:0; transition:background 0.18s;
+}
+.tts-button:hover { background:#f0f0f0; }
+
+.play-button {
+    background:#ff7043; color:white; font-size:15px;
+    padding:10px 24px; margin-bottom:14px;
+}
+.play-button:hover { background:#e64a19; }
+
+.mic-button {
+    background:#7b1fa2; color:white; font-size:22px;
+    width:60px; height:60px; border-radius:50%; padding:0;
+    margin:0 8px; transition: transform 0.15s, background 0.18s;
+}
+.mic-button:hover    { background:#6a1b9a; }
+.mic-button.recording { background:#c62828; transform:scale(1.12); animation: pulse 1s infinite; }
+
+@keyframes pulse {
+    0%,100% { box-shadow:0 0 0 0 rgba(198,40,40,0.4); }
+    50%      { box-shadow:0 0 0 10px rgba(198,40,40,0); }
+}
+
+/* ===== SRS BUTTONS ===== */
+#srs-buttons, #review-srs-buttons, #rv-srs {
+    display:flex; justify-content:center; gap:14px; margin-top:10px;
+}
+.btn-unknown { background:#e53935; min-width:120px; }
+.btn-unknown:hover { background:#c62828; }
+.btn-known   { background:#43a047; min-width:120px; }
+.btn-known:hover   { background:#2e7d32; }
+
+/* ===== QUIZ ===== */
+.quiz-prompt { font-size:13px; color:#888; margin-bottom:4px; }
+.quiz-question {
+    font-size:26px; font-weight:bold; margin:8px 0 16px; color:#222;
+}
+.quiz-options {
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;
+}
+.option-button {
+    display:flex; flex-direction:column; align-items:center;
+    padding:12px 8px; background:#f5f5f5; color:#222;
+    border:2px solid #ddd; border-radius:10px;
+    cursor:pointer; font-size:14px; transition:background 0.15s,border-color 0.15s;
+    margin:0;
+}
+.option-button:hover:not(:disabled) { background:#e3f2fd; border-color:#90caf9; }
+.option-button:disabled { cursor:default; }
+.option-button.correct  { background:#e8f5e9; border-color:#43a047; }
+.option-button.incorrect{ background:#ffebee; border-color:#e53935; }
+
+.opt-chinese { font-size:30px; margin-bottom:3px; line-height:1.2; }
+.opt-pinyin  { font-size:12px; color:#666; }
+.opt-russian { font-size:12px; color:#444; margin-top:2px; }
+
+/* Radicals quiz: 2×2 grid with big characters */
+.rad-grid { grid-template-columns:1fr 1fr; }
+.rad-option { font-size:48px; padding:16px; min-height:80px; }
+
+.quiz-feedback {
+    min-height:24px; font-size:14px; margin-bottom:10px;
+    display:flex; align-items:center; justify-content:center;
+    flex-wrap:wrap; gap:4px;
+}
+.fb-ok  { color:#2e7d32; font-weight:bold; }
+.fb-err { color:#c62828; font-weight:bold; }
+
+/* ===== TONE EXERCISE ===== */
+#tone-pinyin-stripped {
+    font-size:20px; color:#999; letter-spacing:2px;
+}
+#tone-syllables {
+    display:flex; flex-wrap:wrap; justify-content:center; gap:16px;
+    margin:16px 0;
+}
+.tone-block { display:flex; flex-direction:column; align-items:center; }
+.tone-label { font-size:18px; color:#555; margin-bottom:6px; }
+.tone-btns  { display:flex; gap:5px; }
+.tone-btn {
+    width:36px; height:36px; border-radius:8px;
+    background:#f0f0f0; color:#333; border:2px solid #ddd;
+    font-size:15px; font-weight:bold; cursor:pointer; padding:0;
+    transition:background 0.15s, border-color 0.15s;
+}
+.tone-btn:hover:not(:disabled)  { background:#e3f2fd; border-color:#90caf9; }
+.tone-btn.selected   { background:#bbdefb; border-color:#2196F3; color:#1565c0; }
+.tone-btn.tone-correct { background:#c8e6c9; border-color:#43a047; color:#1b5e20; }
+.tone-btn.tone-wrong   { background:#ffcdd2; border-color:#e53935; color:#b71c1c; }
+.tone-btn:disabled { opacity:0.7; cursor:default; }
+
+/* ===== SPEAKING EXERCISE ===== */
+#speak-controls { display:flex; align-items:center; justify-content:center; gap:12px; margin:14px 0; }
+#speak-result   { font-size:16px; color:#333; margin:6px 0; min-height:22px; }
+
+/* ===== HUB PAGE (index.html inline styles supplement) ===== */
+@media(max-width:500px) {
+    .opt-chinese { font-size:24px; }
+    .rad-option  { font-size:36px; }
+    #chinese, #rad-char { font-size:48px; }
+}
