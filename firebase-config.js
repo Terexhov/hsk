@@ -1,13 +1,8 @@
-// =====================================================================
-// Вставьте сюда конфиг вашего Firebase-проекта.
-// Получить: Firebase Console → Project Settings → Your apps → SDK setup
-// Без этого файла прогресс сохраняется только локально в браузере.
-// =====================================================================
 window.FIREBASE_CONFIG = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT.firebaseapp.com",
-    projectId:         "YOUR_PROJECT_ID",
-    storageBucket:     "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId:             "YOUR_APP_ID"
+    apiKey:            "AIzaSyDjoo-x7bcLe40d76KwEmV498p9nNnkD6g",
+    authDomain:        "hsklerarn.firebaseapp.com",
+    projectId:         "hsklerarn",
+    storageBucket:     "hsklerarn.firebasestorage.app",
+    messagingSenderId: "794726332020",
+    appId:             "1:794726332020:web:8b12bd30d3d10b3fe08321"
 };
