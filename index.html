@@ -17,6 +17,9 @@
     </style>
 </head>
 <body>
+    <div class="top-bar" style="justify-content:flex-end;padding:8px 20px 0">
+        <div id="auth-bar" class="auth-bar"></div>
+    </div>
     <h1>Китайский язык</h1>
     <div class="hub">
         <a href="hsk2.html" class="hub-card">
@@ -35,5 +38,10 @@
             <p>Упражнения на проставление тонов и практика произношения с микрофоном.</p>
         </a>
     </div>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
 </body>
 </html>

@@ -10,10 +10,43 @@ body {
 
 h1 { color: #333; margin: 8px 0 16px; }
 
-/* ===== BACK NAV ===== */
-.nav-back { text-align: left; margin-bottom: 4px; }
+/* ===== TOP BAR (nav + auth) ===== */
+.top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+}
+.nav-back { text-align: left; }
 .nav-back a { color: #666; text-decoration: none; font-size: 14px; }
 .nav-back a:hover { color: #333; }
+
+/* ===== AUTH BAR ===== */
+.auth-bar {
+    display: flex; align-items: center; gap: 8px; font-size: 13px;
+}
+.auth-avatar {
+    width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+}
+.auth-name { color: #555; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.auth-btn {
+    padding: 5px 12px; font-size: 12px; border-radius: 20px; margin: 0;
+}
+.auth-btn-in  { background: #4285F4; }
+.auth-btn-in:hover  { background: #3367D6; }
+.auth-btn-out { background: #888; }
+.auth-btn-out:hover { background: #666; }
+
+/* ===== BATCH BANNER ===== */
+.batch-banner {
+    max-width: 620px; margin: 0 auto 12px;
+    background: #43a047; color: white;
+    border-radius: 10px; padding: 10px 18px;
+    font-size: 15px; font-weight: bold;
+    animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
 
 /* ===== PROGRESS ===== */
 #progress-container { max-width: 620px; margin: 0 auto 18px; }

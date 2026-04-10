@@ -9,7 +9,10 @@ const WRONG_INTERVAL = 2 * 60 * 1000;
 function loadSRS() {
     try { return JSON.parse(localStorage.getItem(SRS_KEY)) || {}; } catch { return {}; }
 }
-function saveSRS(s) { localStorage.setItem(SRS_KEY, JSON.stringify(s)); }
+function saveSRS(s) {
+    localStorage.setItem(SRS_KEY, JSON.stringify(s));
+    if (window.HSKAuth) window.HSKAuth.save(SRS_KEY, s);
+}
 function getState(srs, i) { return srs[i] || { score: 0, nextReview: 0 }; }
 
 function markKnown(i) {

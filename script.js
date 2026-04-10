@@ -1,8 +1,9 @@
 // =====================================================================
 // SRS (Spaced Repetition System)
 // =====================================================================
-const SRS_KEY = 'hsk_srs';
+const SRS_KEY        = 'hsk_srs';
 const LEARN_THRESHOLD = 3;
+const BATCH_SIZE      = 10;   // слов в одной группе (как в Duolingo)
 const INTERVALS = [
     10 * 60 * 1000,
     60 * 60 * 1000,
@@ -15,28 +16,80 @@ const WRONG_INTERVAL = 2 * 60 * 1000;
 function loadSRS() {
     try { return JSON.parse(localStorage.getItem(SRS_KEY)) || {}; } catch { return {}; }
 }
-function saveSRS(s) { localStorage.setItem(SRS_KEY, JSON.stringify(s)); }
+function saveSRS(s) {
+    localStorage.setItem(SRS_KEY, JSON.stringify(s));
+    if (window.HSKAuth) window.HSKAuth.save(SRS_KEY, s);  // синхронизация в облако
+}
 function getState(srs, i) { return srs[i] || { score: 0, nextReview: 0 }; }
 
+// =====================================================================
+// Группы (Batch) — Duolingo/Quizlet стиль
+// =====================================================================
+function getCurrentBatch(srs) { return srs.__batch || 0; }
+
+// Верхняя граница активного пула слов (эксклюзивная)
+function getActiveBatchEnd(srs) {
+    return Math.min((getCurrentBatch(srs) + 1) * BATCH_SIZE, vocabulary.length);
+}
+
+// Проверить, завершена ли текущая группа, и если да — разблокировать следующую
+function checkAndUnlockBatch(srs) {
+    const batch = getCurrentBatch(srs);
+    const start = batch * BATCH_SIZE;
+    const end   = Math.min(start + BATCH_SIZE, vocabulary.length);
+    if (end >= vocabulary.length) return; // последняя группа
+
+    const allLearned = Array.from({ length: end - start }, (_, i) => start + i)
+        .every(i => getState(srs, i).score >= LEARN_THRESHOLD);
+
+    if (allLearned) {
+        srs.__batch = batch + 1;
+        showBatchUnlocked(batch + 1);
+    }
+}
+
+function showBatchUnlocked(newBatch) {
+    const banner = document.getElementById('batch-banner');
+    if (!banner) return;
+    const total = Math.ceil(vocabulary.length / BATCH_SIZE);
+    banner.textContent = `🎉 Группа ${newBatch} из ${total} открыта!`;
+    banner.style.display = 'block';
+    setTimeout(() => { banner.style.display = 'none'; }, 3500);
+}
+
+// =====================================================================
+// SRS actions
+// =====================================================================
 function markKnown(i) {
     const srs = loadSRS();
     const newScore = Math.min(5, getState(srs, i).score + 1);
     srs[i] = { score: newScore, nextReview: Date.now() + INTERVALS[Math.min(newScore - 1, INTERVALS.length - 1)] };
-    saveSRS(srs); updateProgress();
+    checkAndUnlockBatch(srs);
+    saveSRS(srs);
+    updateProgress();
 }
 function markUnknown(i) {
     const srs = loadSRS();
     srs[i] = { score: Math.max(0, getState(srs, i).score - 1), nextReview: Date.now() + WRONG_INTERVAL };
-    saveSRS(srs); updateProgress();
+    saveSRS(srs);
+    updateProgress();
 }
 
+// learnedOnly=false → из активного пула (текущие группы)
+// learnedOnly=true  → все выученные слова (для Повторения)
 function getNextIndex(learnedOnly) {
     const srs = loadSRS(), now = Date.now();
-    const pool = vocabulary.map((_, i) => i).filter(i =>
-        learnedOnly ? getState(srs, i).score >= LEARN_THRESHOLD : getState(srs, i).score < LEARN_THRESHOLD
+    const limit = learnedOnly ? vocabulary.length : getActiveBatchEnd(srs);
+    const all   = Array.from({ length: limit }, (_, i) => i);
+
+    const pool = all.filter(i =>
+        learnedOnly
+            ? getState(srs, i).score >= LEARN_THRESHOLD
+            : getState(srs, i).score < LEARN_THRESHOLD
     );
     if (!pool.length) return null;
-    const due = pool.filter(i => getState(srs, i).nextReview <= now);
+
+    const due    = pool.filter(i => getState(srs, i).nextReview <= now);
     if (due.length) return due[Math.floor(Math.random() * due.length)];
     const unseen = pool.filter(i => !srs[i]);
     if (unseen.length) return unseen[Math.floor(Math.random() * unseen.length)];
@@ -47,10 +100,21 @@ function getNextIndex(learnedOnly) {
 // Progress
 // =====================================================================
 function updateProgress() {
-    const srs = loadSRS(), total = vocabulary.length;
+    const srs    = loadSRS();
+    const total  = vocabulary.length;
     const learned = vocabulary.filter((_, i) => getState(srs, i).score >= LEARN_THRESHOLD).length;
-    const pct = Math.round(learned / total * 100);
-    document.getElementById('progress-text').textContent = `Выучено: ${learned} / ${total} (${pct}%)`;
+    const pct    = Math.round(learned / total * 100);
+
+    // Прогресс текущей группы
+    const batch  = getCurrentBatch(srs);
+    const bStart = batch * BATCH_SIZE;
+    const bEnd   = Math.min(bStart + BATCH_SIZE, total);
+    const bLearned = Array.from({ length: bEnd - bStart }, (_, i) => bStart + i)
+        .filter(i => getState(srs, i).score >= LEARN_THRESHOLD).length;
+    const totalBatches = Math.ceil(total / BATCH_SIZE);
+
+    document.getElementById('progress-text').textContent =
+        `Группа ${batch + 1} из ${totalBatches}  •  ${bLearned}/${bEnd - bStart} слов в группе  •  Всего выучено: ${learned}/${total}`;
     document.getElementById('progress-bar-fill').style.width = pct + '%';
 }
 
@@ -70,13 +134,11 @@ function stripTones(s) {
             .replace(/[īíǐì]/g,'i').replace(/[ōóǒò]/g,'o')
             .replace(/[ūúǔù]/g,'u').replace(/[ǖǘǚǜ]/g,'ü').trim();
 }
-
 function getInitial(stripped) {
     for (const ini of ['zh','ch','sh','b','p','m','f','d','t','n','l','g','k','h','j','q','x','z','c','s','r','y','w'])
         if (stripped.startsWith(ini)) return ini;
     return '';
 }
-
 function similarityScore(pinA, pinB) {
     const a = stripTones(pinA.toLowerCase()).split(' ')[0];
     const b = stripTones(pinB.toLowerCase()).split(' ')[0];
@@ -86,32 +148,24 @@ function similarityScore(pinA, pinB) {
     else if (a.slice(getInitial(a).length) === b.slice(getInitial(b).length)) s += 5;
     return s;
 }
-
-// Returns `count` distractor indices (similar-sounding preferred)
 function getDistractors(correctIdx, count) {
     const target = vocabulary[correctIdx];
     const scored = vocabulary
         .map((w, i) => ({ i, s: i !== correctIdx ? similarityScore(target.pinyin, w.pinyin) : -1 }))
         .filter(x => x.s >= 0)
         .sort((a, b) => b.s - a.s);
-
     const similar = scored.filter(x => x.s > 0);
     const rest    = scored.filter(x => x.s === 0);
     shuffleArray(rest);
-
     const result = [];
     while (result.length < count) {
-        if (similar.length && result.length < Math.ceil(count / 2))
-            result.push(similar.shift().i);
-        else if (rest.length)
-            result.push(rest.shift().i);
-        else if (similar.length)
-            result.push(similar.shift().i);
+        if (similar.length && result.length < Math.ceil(count / 2)) result.push(similar.shift().i);
+        else if (rest.length) result.push(rest.shift().i);
+        else if (similar.length) result.push(similar.shift().i);
         else break;
     }
     return result;
 }
-
 function makeOptions(correctIdx, count = 4) {
     const opts = [correctIdx, ...getDistractors(correctIdx, count - 1)];
     shuffleArray(opts);
@@ -144,7 +198,13 @@ function loadCard() {
     const flipBtn = document.getElementById('flip-card'), srsBtns = document.getElementById('srs-buttons');
 
     if (fcIndex === null) {
-        front.innerHTML = '<p class="empty-msg">Новых слов нет!<br>Перейдите в «Повторение» для закрепления.</p>';
+        const srs   = loadSRS();
+        const batch = getCurrentBatch(srs);
+        const bEnd  = Math.min((batch + 1) * BATCH_SIZE, vocabulary.length);
+        const allDone = bEnd >= vocabulary.length;
+        front.innerHTML = allDone
+            ? '<p class="empty-msg">🏆 Все слова выучены!<br>Используйте «Повторение» для закрепления.</p>'
+            : '<p class="empty-msg">✅ Группа пройдена!<br>Перейдите в «Повторение» для закрепления,<br>или подождите — следующие слова откроются скоро.</p>';
         back.style.display = flipBtn.style.display = srsBtns.style.display = 'none';
         return;
     }
@@ -174,50 +234,46 @@ document.getElementById('btn-unknown').addEventListener('click', () => { if (fcI
 // =====================================================================
 // Quiz: Translation (Russian → Chinese+Pinyin)
 // =====================================================================
-let qtIndex = null, qtDone = false;
+let qtIndex = null;
 
 function genQuizTrans() {
-    qtDone = false; qtIndex = getNextIndex(false);
+    qtIndex = getNextIndex(false);
     const qEl = document.getElementById('qt-question'), oEl = document.getElementById('qt-options');
     document.getElementById('qt-feedback').innerHTML = '';
-    if (qtIndex === null) { qEl.textContent = 'Все слова пройдены!'; oEl.innerHTML = ''; return; }
+    if (qtIndex === null) { qEl.textContent = 'Все слова текущей группы пройдены!'; oEl.innerHTML = ''; return; }
     qEl.textContent = vocabulary[qtIndex].russian;
-    renderOptions(oEl, makeOptions(qtIndex), (idx) => checkQuiz(idx, qtIndex, 'qt', 'trans'));
+    renderOptions(oEl, makeOptions(qtIndex), (idx) => checkQuiz(idx, qtIndex, 'qt'));
 }
-
 document.getElementById('qt-next').addEventListener('click', genQuizTrans);
 
 // =====================================================================
 // Quiz: Character (Chinese → Pinyin+Russian)
 // =====================================================================
-let qcIndex = null, qcDone = false;
+let qcIndex = null;
 
 function genQuizChar() {
-    qcDone = false; qcIndex = getNextIndex(false);
+    qcIndex = getNextIndex(false);
     const qEl = document.getElementById('qc-question'), oEl = document.getElementById('qc-options');
     document.getElementById('qc-feedback').innerHTML = '';
-    if (qcIndex === null) { qEl.textContent = 'Все слова пройдены!'; oEl.innerHTML = ''; return; }
+    if (qcIndex === null) { qEl.textContent = 'Все слова текущей группы пройдены!'; oEl.innerHTML = ''; return; }
     qEl.textContent = vocabulary[qcIndex].chinese;
-    renderOptions(oEl, makeOptions(qcIndex), (idx) => checkQuiz(idx, qcIndex, 'qc', 'char'));
+    renderOptions(oEl, makeOptions(qcIndex), (idx) => checkQuiz(idx, qcIndex, 'qc'));
 }
-
 document.getElementById('qc-next').addEventListener('click', genQuizChar);
 
 // =====================================================================
-// Quiz: Audio (Listen → Chinese+Pinyin+Russian)
+// Quiz: Audio
 // =====================================================================
-let qaIndex = null, qaDone = false;
+let qaIndex = null;
 
 function genQuizAudio() {
-    qaDone = false; qaIndex = getNextIndex(false);
+    qaIndex = getNextIndex(false);
     const oEl = document.getElementById('qa-options');
     document.getElementById('qa-feedback').innerHTML = '';
-    if (qaIndex === null) { oEl.innerHTML = '<p class="empty-msg">Все слова пройдены!</p>'; return; }
-    // auto-play after tiny delay
+    if (qaIndex === null) { oEl.innerHTML = '<p class="empty-msg">Все слова текущей группы пройдены!</p>'; return; }
     setTimeout(() => speak(vocabulary[qaIndex].chinese), 300);
-    renderOptions(oEl, makeOptions(qaIndex), (idx) => checkQuiz(idx, qaIndex, 'qa', 'audio'), true);
+    renderOptions(oEl, makeOptions(qaIndex), (idx) => checkQuiz(idx, qaIndex, 'qa'), true);
 }
-
 document.getElementById('qa-play').addEventListener('click', () => {
     if (qaIndex !== null) speak(vocabulary[qaIndex].chinese);
 });
@@ -226,7 +282,6 @@ document.getElementById('qa-next').addEventListener('click', genQuizAudio);
 // =====================================================================
 // Generic option renderer & checker
 // =====================================================================
-// mode: 'trans' → show Chinese+Pinyin | 'char' → show Pinyin+Russian | 'audio' → show all three
 function renderOptions(container, opts, onAnswer, fullCard = false) {
     container.innerHTML = '';
     opts.forEach(idx => {
@@ -244,15 +299,14 @@ function renderOptions(container, opts, onAnswer, fullCard = false) {
     });
 }
 
-function checkQuiz(selectedIdx, correctIdx, prefix, mode) {
-    const feedbackEl = document.getElementById(prefix + '-feedback');
+function checkQuiz(selectedIdx, correctIdx, prefix) {
     document.querySelectorAll(`#${prefix}-options .option-button`).forEach(btn => {
         btn.disabled = true;
         const bi = parseInt(btn.dataset.idx);
         if (bi === correctIdx)   btn.classList.add('correct');
         if (bi === selectedIdx && bi !== correctIdx) btn.classList.add('incorrect');
     });
-
+    const feedbackEl = document.getElementById(prefix + '-feedback');
     if (selectedIdx === correctIdx) {
         feedbackEl.innerHTML = '<span class="fb-ok">✓ Правильно!</span>';
         markKnown(correctIdx);
@@ -269,8 +323,9 @@ function checkQuiz(selectedIdx, correctIdx, prefix, mode) {
 
 // =====================================================================
 // Review (mixed: flashcard | trans | char | audio)
+// Использует ВСЕ выученные слова из всех групп
 // =====================================================================
-let reviewIdx = null, reviewMode = null, reviewFlipped = false;
+let reviewIdx = null, reviewMode = null;
 const REVIEW_MODES = ['flash', 'trans', 'char', 'audio'];
 
 function loadReview() {
@@ -293,7 +348,6 @@ function loadReview() {
 function renderReview(idx, mode, container, feedback) {
     const w = vocabulary[idx];
     if (mode === 'flash') {
-        reviewFlipped = false;
         container.innerHTML = `
             <div id="rv-card">
                 <div id="rv-front" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
@@ -318,18 +372,17 @@ function renderReview(idx, mode, container, feedback) {
             container.querySelector('#rv-flip').textContent = f2 ? 'Показать перевод' : 'Показать иероглиф';
             container.querySelector('#rv-srs').style.display = f2 ? 'none' : 'flex';
         });
-        container.querySelector('#rv-yes').addEventListener('click', () => { markKnown(idx); loadReview(); });
+        container.querySelector('#rv-yes').addEventListener('click', () => { markKnown(idx);   loadReview(); });
         container.querySelector('#rv-no') .addEventListener('click', () => { markUnknown(idx); loadReview(); });
     } else {
-        // quiz-style
         let prompt = '', question = '', fullCard = false;
         if (mode === 'trans') {
             prompt   = 'Выберите иероглиф для слова:';
             question = `<div class="quiz-question">${w.russian}</div>`;
         } else if (mode === 'char') {
-            prompt   = 'Выберите значение и пиньинь для иероглифа:';
+            prompt   = 'Выберите значение и пиньинь:';
             question = `<div class="quiz-question" style="font-size:56px">${w.chinese}</div>`;
-        } else if (mode === 'audio') {
+        } else {
             prompt   = 'Прослушайте и выберите:';
             question = `<button class="play-button" id="rv-play">🔊 Воспроизвести</button>`;
             fullCard = true;
@@ -339,21 +392,14 @@ function renderReview(idx, mode, container, feedback) {
             <div class="quiz-prompt">${prompt}</div>
             ${question}
             <div id="rv-options" class="quiz-options"></div>`;
-        if (mode === 'audio') {
-            container.querySelector('#rv-play')?.addEventListener('click', () => speak(w.chinese));
-        }
+        if (mode === 'audio') container.querySelector('#rv-play')?.addEventListener('click', () => speak(w.chinese));
         const optsEl = container.querySelector('#rv-options');
-        const opts   = makeOptions(idx);
-        opts.forEach(oi => {
+        makeOptions(idx).forEach(oi => {
             const ww = vocabulary[oi], btn = document.createElement('button');
             btn.className = 'option-button'; btn.dataset.idx = oi;
-            if (fullCard || mode === 'audio') {
-                btn.innerHTML = `<span class="opt-chinese">${ww.chinese}</span><span class="opt-pinyin">${ww.pinyin}</span><span class="opt-russian">${ww.russian}</span>`;
-            } else if (mode === 'char') {
-                btn.innerHTML = `<span class="opt-pinyin">${ww.pinyin}</span><span class="opt-russian">${ww.russian}</span>`;
-            } else {
-                btn.innerHTML = `<span class="opt-chinese">${ww.chinese}</span><span class="opt-pinyin">${ww.pinyin}</span>`;
-            }
+            if (fullCard)        btn.innerHTML = `<span class="opt-chinese">${ww.chinese}</span><span class="opt-pinyin">${ww.pinyin}</span><span class="opt-russian">${ww.russian}</span>`;
+            else if (mode==='char') btn.innerHTML = `<span class="opt-pinyin">${ww.pinyin}</span><span class="opt-russian">${ww.russian}</span>`;
+            else                 btn.innerHTML = `<span class="opt-chinese">${ww.chinese}</span><span class="opt-pinyin">${ww.pinyin}</span>`;
             btn.addEventListener('click', () => {
                 optsEl.querySelectorAll('.option-button').forEach(b => {
                     b.disabled = true;
@@ -395,3 +441,6 @@ function shuffleArray(arr) {
 // =====================================================================
 updateProgress();
 loadCard();
+
+// После синхронизации с Firestore — перерисовать UI
+window.addEventListener('hsk-synced', () => { updateProgress(); loadCard(); });

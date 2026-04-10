@@ -7,11 +7,17 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="nav-back"><a href="index.html">← Главная</a></div>
+    <div class="top-bar">
+        <div class="nav-back"><a href="index.html">← Главная</a></div>
+        <div id="auth-bar" class="auth-bar"></div>
+    </div>
+
     <h1>Словарь HSK 2</h1>
 
+    <div id="batch-banner" class="batch-banner" style="display:none"></div>
+
     <div id="progress-container">
-        <div id="progress-text">Выучено: 0 / …</div>
+        <div id="progress-text">Загрузка…</div>
         <div id="progress-bar"><div id="progress-bar-fill"></div></div>
     </div>
 
@@ -79,6 +85,12 @@
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
